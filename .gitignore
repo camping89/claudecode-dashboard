@@ -1,0 +1,7 @@
+node_modules
+.turbo
+dist
+.next
+*.log
+.env*.local
+# Keep bun.lock for reproducible installs
