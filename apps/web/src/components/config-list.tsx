@@ -55,9 +55,22 @@ interface ConfigListProps {
   description?: string
   count?: number
   children: React.ReactNode
+  emptyIcon?: React.ReactNode
+  emptyTitle?: string
+  emptyDescription?: string
 }
 
-export function ConfigList({ title, description, count, children }: ConfigListProps) {
+export function ConfigList({
+  title,
+  description,
+  count,
+  children,
+  emptyIcon,
+  emptyTitle,
+  emptyDescription,
+}: ConfigListProps) {
+  const isEmpty = count === 0
+
   return (
     <div className="space-y-6">
       <div>
@@ -69,7 +82,19 @@ export function ConfigList({ title, description, count, children }: ConfigListPr
         </h1>
         {description && <p className="text-muted-foreground mt-2">{description}</p>}
       </div>
-      <div className="grid gap-4">{children}</div>
+      {isEmpty ? (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-10 text-center">
+            {emptyIcon && <div className="mb-4 text-muted-foreground">{emptyIcon}</div>}
+            <h3 className="font-medium text-lg">{emptyTitle || 'No ' + title + ' Found'}</h3>
+            {emptyDescription && (
+              <p className="text-muted-foreground text-sm mt-1 max-w-sm">{emptyDescription}</p>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4">{children}</div>
+      )}
     </div>
   )
 }

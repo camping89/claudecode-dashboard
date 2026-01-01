@@ -2,6 +2,7 @@
 
 import { useConfig } from '@/hooks/use-config'
 import { ConfigList, ConfigItem } from '@/components/config-list'
+import { Plug } from 'lucide-react'
 
 export default function PluginsPage() {
   const { data, loading, error } = useConfig()
@@ -11,7 +12,14 @@ export default function PluginsPage() {
   if (!data) return null
 
   return (
-    <ConfigList title="Plugins" description="Installed plugins" count={data.plugins.length}>
+    <ConfigList
+      title="Plugins"
+      description="Installed plugins"
+      count={data.plugins.length}
+      emptyIcon={<Plug className="h-10 w-10" />}
+      emptyTitle="No Plugins Installed"
+      emptyDescription="Plugins extend Claude Code with additional commands, skills, and agents. Install plugins to enhance your workflow."
+    >
       {data.plugins.map((plugin) => (
         <ConfigItem
           key={plugin.path}
@@ -19,7 +27,7 @@ export default function PluginsPage() {
           description={plugin.description}
           badges={[
             { label: plugin.enabled ? 'enabled' : 'disabled', variant: plugin.enabled ? 'success' : 'secondary' },
-            ...(plugin.version ? [{ label: `v${plugin.version}`, variant: 'outline' as const }] : []),
+            ...(plugin.version ? [{ label: 'v' + plugin.version, variant: 'outline' as const }] : []),
           ]}
           metadata={[
             { label: 'Path', value: plugin.path },
