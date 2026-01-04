@@ -11,7 +11,7 @@ export default defineConfig({
   banner: {
     js: '#!/usr/bin/env node'
   },
-  external: [],
-  noExternal: [/.*/],
+  external: ['react-devtools-core'],
+  noExternal: [/^(?!react-devtools-core).*/],
   treeshake: true,
 })
