@@ -1,27 +1,46 @@
 # CC Dashboard
 
-Read-only dashboard for viewing Claude Code configurations.
+CLI dashboard for viewing Claude Code configurations.
 
-## Prerequisites
-
-- [Bun](https://bun.sh) v1.2+
-
-## Quick Start
+## Installation
 
 ```bash
-# Install dependencies
-bun install
+# npm
+npm install -g cc-dashboard
 
-# Run both API + Web in parallel
-bun run dev
+# bun
+bun add -g cc-dashboard
 ```
 
-- **API**: http://localhost:4173
-- **Web**: http://localhost:3000
+## Usage
+
+```bash
+# Interactive TUI
+cc-dashboard
+
+# JSON output (all configs)
+cc-dashboard --json
+
+# Specific category
+cc-dashboard skills
+cc-dashboard agents --json
+cc-dashboard mcp
+
+# Pipe to jq
+cc-dashboard skills --json | jq '.[].name'
+```
+
+## Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| ↑↓ | Navigate items |
+| ←→ | Switch panels |
+| Enter | Select/expand |
+| r | Refresh |
+| q | Quit |
 
 ## Config Locations
-
-Dashboard reads from default Claude Code paths:
 
 | Config | Path |
 |--------|------|
@@ -30,67 +49,30 @@ Dashboard reads from default Claude Code paths:
 | Agents | `~/.claude/agents/` |
 | Commands | `~/.claude/commands/` |
 | Hooks | `~/.claude/hooks/hooks.json` |
-| Plugins | `~/.claude/plugins/` |
 | MCP Servers | `~/.claude.json` → `mcpServers` |
+| Plugins | `~/.claude/plugins/` |
 
-## Project Structure
+## Requirements
 
-```
-cc-dashboard/
-├── apps/
-│   ├── api/           # Hono backend (port 4173)
-│   └── web/           # Next.js frontend (port 3000)
-├── packages/
-│   ├── types/         # Shared TypeScript types
-│   └── config-reader/ # Config file parsers
-```
+- Terminal width: 80+ columns
+- Node.js 20+ or Bun 1.2+
 
-## Scripts
+## Development
 
 ```bash
-bun run dev         # Start both servers (turbo)
-bun run build       # Build all packages
-bun run type-check  # TypeScript validation
+# Install dependencies
+bun install
+
+# Run in development
+bun run dev
+
+# Build
+bun run build
+
+# Type check
+bun run type-check
 ```
 
-## Testing Individual Packages
+## License
 
-```bash
-# API only
-bun run --filter @cc/api dev
-
-# Web only
-bun run --filter @cc/web dev
-```
-
-## API Endpoints
-
-| Endpoint | Description |
-|----------|-------------|
-| `GET /health` | Health check |
-| `GET /api/config/all` | All configs at once |
-| `GET /api/config/settings` | Settings only |
-| `GET /api/config/skills` | Skills list |
-| `GET /api/config/agents` | Agents list |
-| `GET /api/config/commands` | Commands list |
-| `GET /api/config/hooks` | Hooks list |
-| `GET /api/config/plugins` | Plugins list |
-| `GET /api/config/mcp` | MCP servers |
-| `WS /ws` | Real-time updates |
-
-## Real-time Updates
-
-WebSocket at `ws://localhost:4173/ws` broadcasts config changes detected by chokidar file watcher.
-
-Message format:
-```json
-{"type": "config-update", "category": "skills", "data": [...]}
-```
-
-## Tech Stack
-
-- **Runtime**: Bun
-- **Monorepo**: Turborepo
-- **API**: Hono + Bun native WebSocket
-- **Frontend**: Next.js 15 + React 19 + Tailwind + shadcn/ui
-- **File Watching**: chokidar
+MIT

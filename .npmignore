@@ -1,0 +1,15 @@
+# Development
+src/
+tsconfig.json
+tsup.config.ts
+.git/
+.github/
+plans/
+learning/
+.playwright-mcp/
+docs/
+
+# Build artifacts (keep dist/)
+*.log
+.DS_Store
+.claude/
