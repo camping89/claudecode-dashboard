@@ -1,7 +1,7 @@
-# CC Dashboard - Codebase Summary
+# ClaudeCode Dashboard - Codebase Summary
 
 ## Project Overview
-CC Dashboard is a Node.js CLI tool for viewing Claude Code configurations from the filesystem. Phase 1 establishes the infrastructure: configuration readers, type system, and build tooling.
+ClaudeCode Dashboard is a Node.js CLI tool for viewing Claude Code configurations from the filesystem. Phase 1 establishes the infrastructure: configuration readers, type system, and build tooling.
 
 **Status**: Phase 1 Complete
 **Runtime**: Node.js 20+
@@ -11,7 +11,7 @@ CC Dashboard is a Node.js CLI tool for viewing Claude Code configurations from t
 ## Repository Structure
 
 ```
-cc-dashboard/
+claudecode-dashboard/
 ├── src/
 │   ├── cli.tsx                              # CLI entry point (stub - Phase 1)
 │   └── lib/
@@ -70,7 +70,7 @@ CLI entry point. Currently a stub logging a Phase 1 completion message. Phase 2 
 - Config reader integration
 
 ```typescript
-console.log('cc-dashboard: CLI entry point created. Run Phase 2 for full TUI.')
+console.log('claudecode-dashboard: CLI entry point created. Run Phase 2 for full TUI.')
 ```
 
 ### src/lib/types.ts (156 lines)
@@ -174,7 +174,7 @@ Provides clean public API: `import { readSettings, CLAUDE_PATHS } from '@cc/conf
 
 ### package.json
 - **Type**: module (ESM)
-- **Bin**: `cc-dashboard` → `./dist/cli.js`
+- **Bin**: `claudecode-dashboard` / `ccd` → `./dist/cli.js`
 - **Files**: Only dist/ included in npm package
 - **Engines**: node >=20
 
@@ -231,7 +231,7 @@ import type { ClaudeSettings } from '../../types.js'
 
 ## Execution Flow
 
-1. CLI invoked: `cc-dashboard` (from npm bin)
+1. CLI invoked: `claudecode-dashboard` or `ccd` (from npm bin)
 2. Shebang routed to Node.js
 3. Executes bundled dist/cli.js
 4. Current output: Phase 1 message (placeholder)

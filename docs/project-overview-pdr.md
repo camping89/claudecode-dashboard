@@ -1,8 +1,8 @@
-# CC Dashboard - Project Overview & Product Development Requirements
+# ClaudeCode Dashboard - Project Overview & Product Development Requirements
 
 ## Project Overview
 
-**CC Dashboard** is a command-line interface (CLI) tool for viewing and managing Claude Code configurations. It provides developers with a read-only dashboard to inspect Claude Code settings, skills, agents, commands, plugins, hooks, and MCP server configurations stored in `~/.claude/`.
+**ClaudeCode Dashboard** is a command-line interface (CLI) tool for viewing and managing Claude Code configurations. It provides developers with a read-only dashboard to inspect Claude Code settings, skills, agents, commands, plugins, hooks, and MCP server configurations stored in `~/.claude/`.
 
 The project is transitioning from a monorepo structure (Turborepo with separate API and Web apps) to a focused CLI application leveraging modern Node.js tooling.
 
@@ -41,7 +41,7 @@ The project is transitioning from a monorepo structure (Turborepo with separate 
 - **F2.4**: Define WebSocket message types for real-time updates
 
 #### F3: CLI Interface
-- **F3.1**: Implement executable CLI entry point (`cc-dashboard` command)
+- **F3.1**: Implement executable CLI entry point (`claudecode-dashboard` command)
 - **F3.2**: Support various output formats (text, JSON in Phase 2)
 - **F3.3**: Handle errors gracefully with user-friendly messages
 
@@ -165,7 +165,7 @@ The project is transitioning from a monorepo structure (Turborepo with separate 
 ## File Structure
 
 ```
-cc-dashboard/
+claudecode-dashboard/
 ├── src/
 │   ├── cli.tsx                    # CLI entry point
 │   └── lib/

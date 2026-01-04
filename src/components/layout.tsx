@@ -27,7 +27,7 @@ export function Layout({ config, nav, width, height }: LayoutProps) {
     <Box flexDirection="column" width={width}>
       {/* Header */}
       <Box borderStyle="single" paddingX={1}>
-        <Text bold color="cyan">CC Dashboard</Text>
+        <Text bold color="cyan">ClaudeCode Dashboard</Text>
         <Box flexGrow={1} />
         <Text dimColor>Claude Code Config Viewer</Text>
       </Box>

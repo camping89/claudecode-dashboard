@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "tsx src/cli.tsx",
     "build": "tsup",
-    "build:bun": "bun build src/cli.tsx --compile --outfile dist/cc-dashboard",
+    "build:bun": "bun build src/cli.tsx --compile --outfile dist/claudecode-dashboard",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {

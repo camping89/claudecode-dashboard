@@ -1,10 +1,10 @@
-# CC Dashboard - Code Standards & Codebase Structure
+# ClaudeCode Dashboard - Code Standards & Codebase Structure
 
 ## Codebase Structure
 
 ### Root Level Files
 ```
-cc-dashboard/
+claudecode-dashboard/
 ├── package.json              # Project metadata and scripts
 ├── tsconfig.json            # TypeScript compiler configuration
 ├── tsup.config.ts           # Build configuration for tsup
@@ -110,7 +110,7 @@ banner: {
   js: '#!/usr/bin/env node'
 }
 ```
-Allows `cc-dashboard` to be executed directly as command.
+Allows `claudecode-dashboard` to be executed directly as command.
 
 ## Code Standards
 
@@ -220,10 +220,11 @@ npm run type-check   # TypeScript validation
 **Key Entries**:
 ```json
 {
-  "name": "cc-dashboard",
+  "name": "claudecode-dashboard",
   "type": "module",              // ESM only
   "bin": {
-    "cc-dashboard": "./dist/cli.js"
+    "claudecode-dashboard": "./dist/cli.js",
+    "ccd": "./dist/cli.js"
   },
   "files": ["dist"],             // Only dist/ in npm package
   "scripts": {                   // Build and dev scripts

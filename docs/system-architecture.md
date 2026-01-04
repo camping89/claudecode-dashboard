@@ -1,8 +1,8 @@
-# CC Dashboard - System Architecture
+# ClaudeCode Dashboard - System Architecture
 
 ## Architecture Overview
 
-CC Dashboard Phase 1 implements a modular CLI infrastructure for reading and managing Claude Code configurations. The architecture emphasizes separation of concerns, type safety, and extensibility.
+ClaudeCode Dashboard Phase 1 implements a modular CLI infrastructure for reading and managing Claude Code configurations. The architecture emphasizes separation of concerns, type safety, and extensibility.
 
 ### High-Level Architecture
 
@@ -310,7 +310,7 @@ interface DashboardState {
 
 ### Configuration Read Flow (Phase 1)
 ```
-User runs: cc-dashboard
+User runs: claudecode-dashboard
     ↓
 CLI entry point (cli.tsx) invoked
     ↓
