@@ -1,8 +1,9 @@
 # Plan: CC Dashboard CLI Refactor
 
 **Created:** 2026-01-04
-**Status:** Phase 1 Complete - Proceeding to Phase 2
+**Status:** Complete
 **Phase 1 Completed:** 2026-01-04 10:27
+**All Phases Completed:** 2026-01-04
 **Brainstorm:** [brainstorm-260104-0900-cli-refactor.md](../reports/brainstorm-260104-0900-cli-refactor.md)
 
 ---
@@ -93,13 +94,13 @@ cc-dashboard/
 
 ## Success Criteria
 
-- [ ] `npm i -g cc-dashboard && cc-dashboard` works
-- [ ] `bun add -g cc-dashboard && cc-dashboard` works
-- [ ] TUI renders at 120+ cols with side panel
-- [ ] Arrow keys navigate categories/items
-- [ ] `cc-dashboard --json` outputs valid JSON
-- [ ] Startup < 500ms
-- [ ] Bundle < 1MB
+- [x] `npm i -g cc-dashboard && cc-dashboard` works
+- [x] `bun add -g cc-dashboard && cc-dashboard` works
+- [x] TUI renders at 120+ cols with side panel
+- [x] Arrow keys navigate categories/items
+- [x] `cc-dashboard --json` outputs valid JSON
+- [x] Startup < 500ms
+- [x] Bundle < 1MB (~532KB total)
 
 ---
 

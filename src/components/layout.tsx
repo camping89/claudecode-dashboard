@@ -12,11 +12,17 @@ interface LayoutProps {
   config: DashboardState
   nav: NavState
   width: number
+  height: number
 }
 
-export function Layout({ config, nav, width }: LayoutProps) {
-  const leftWidth = 32
-  const rightWidth = width - leftWidth - 3
+export function Layout({ config, nav, width, height }: LayoutProps) {
+  // Tree layout: Categories (18) | Items (30) | Details (rest)
+  const categoryWidth = 18
+  const itemWidth = 30
+  const detailWidth = width - categoryWidth - itemWidth - 6  // 6 for borders
+
+  // Use full terminal height: subtract header (3) + status bar (1) + borders (2)
+  const contentHeight = Math.max(10, height - 6)
 
   return (
     <Box flexDirection="column" width={width}>
@@ -27,29 +33,34 @@ export function Layout({ config, nav, width }: LayoutProps) {
         <Text dimColor>Claude Code Config Viewer</Text>
       </Box>
 
-      {/* Main content */}
-      <Box height={18}>
-        {/* Left panel */}
-        <Box flexDirection="column" width={leftWidth} borderStyle="single" paddingX={1}>
+      {/* Main content - horizontal tree layout */}
+      <Box height={contentHeight}>
+        {/* Categories panel */}
+        <Box flexDirection="column" width={categoryWidth} borderStyle="single" paddingX={1}>
           <CategoryMenu
             categories={nav.categories}
             selected={nav.categoryIndex}
             focused={nav.panel === 'category'}
           />
-          <Box marginTop={1}>
-            <ItemList
-              items={nav.currentItems as Array<{ name: string; source?: string }>}
-              selected={nav.itemIndex}
-              focused={nav.panel === 'item'}
-            />
-          </Box>
         </Box>
 
-        {/* Right panel */}
-        <Box flexDirection="column" width={rightWidth} borderStyle="single">
+        {/* Items panel */}
+        <Box flexDirection="column" width={itemWidth} borderStyle="single" paddingX={1}>
+          <ItemList
+            items={nav.currentItems as Array<{ name: string; source?: string }>}
+            selected={nav.itemIndex}
+            focused={nav.panel === 'item'}
+            maxHeight={contentHeight - 4}
+          />
+        </Box>
+
+        {/* Details panel */}
+        <Box flexDirection="column" width={detailWidth} borderStyle="single">
           <DetailPanel
             item={nav.selectedItem as Record<string, unknown> | null}
-            width={rightWidth}
+            width={detailWidth}
+            maxHeight={contentHeight - 2}
+            category={nav.categories[nav.categoryIndex]?.key}
           />
         </Box>
       </Box>

@@ -27,6 +27,7 @@ export function App({ initialCategory }: AppProps) {
   })
 
   const width = stdout?.columns ?? 120
+  const height = stdout?.rows ?? 30
 
   if (width < 80) {
     return (
@@ -58,5 +59,5 @@ export function App({ initialCategory }: AppProps) {
     )
   }
 
-  return <Layout config={config.data} nav={nav} width={Math.min(width, 140)} />
+  return <Layout config={config.data} nav={nav} width={Math.min(width, 160)} height={height} />
 }

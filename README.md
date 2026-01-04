@@ -48,9 +48,34 @@ cc-dashboard skills --json | jq '.[].name'
 | Skills | `~/.claude/skills/` |
 | Agents | `~/.claude/agents/` |
 | Commands | `~/.claude/commands/` |
-| Hooks | `~/.claude/hooks/hooks.json` |
-| MCP Servers | `~/.claude.json` → `mcpServers` |
+| Hooks | `~/.claude/settings.json` → `hooks` |
+| MCP Servers | `~/.mcp.json` + `./.mcp.json` |
 | Plugins | `~/.claude/plugins/` |
+
+## AI Summaries (Optional)
+
+The dashboard shows a 30-line preview of skill/agent/command files by default.
+For AI-generated summaries, set one of these environment variables:
+
+```bash
+# Option 1: Anthropic Claude (recommended)
+export ANTHROPIC_API_KEY=sk-ant-...
+
+# Option 2: OpenAI
+export OPENAI_API_KEY=sk-...
+```
+
+**Models Used:**
+- Anthropic: `claude-haiku-4-5-latest` (fast, efficient)
+- OpenAI: `gpt-5.2-mini` (fast, cheap)
+
+**Features:**
+- Summaries are cached in `~/.claude/cc-dashboard/cache.json`
+- Cache invalidates automatically when files change
+- Status bar shows current provider and model
+- Without API key: shows `Preview` (first 30 lines of markdown)
+
+**Privacy:** Your API key is used locally only. No data is sent anywhere except to the LLM provider you configure.
 
 ## Requirements
 

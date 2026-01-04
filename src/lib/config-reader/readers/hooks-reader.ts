@@ -1,7 +1,7 @@
 // Hooks configuration reader
+// Reads hooks from ~/.claude/settings.json under the "hooks" key
 import { readFile } from 'fs/promises'
 import { existsSync } from 'fs'
-import { join } from 'path'
 import type { Hook } from '../../types.js'
 import { CLAUDE_PATHS } from '../paths.js'
 
@@ -17,18 +17,24 @@ interface HooksConfig {
   }>
 }
 
-export async function readHooks(): Promise<Hook[]> {
-  const hooksDir = CLAUDE_PATHS.userHooks()
-  const hooksFile = join(hooksDir, 'hooks.json')
+interface SettingsWithHooks {
+  hooks?: HooksConfig
+}
 
-  if (!existsSync(hooksFile)) return []
+export async function readHooks(): Promise<Hook[]> {
+  const settingsPath = CLAUDE_PATHS.userSettings()
+
+  if (!existsSync(settingsPath)) return []
 
   try {
-    const content = await readFile(hooksFile, 'utf-8')
-    const config: HooksConfig = JSON.parse(content)
+    const content = await readFile(settingsPath, 'utf-8')
+    const settings: SettingsWithHooks = JSON.parse(content)
+
+    if (!settings.hooks) return []
+
     const hooks: Hook[] = []
 
-    for (const [eventName, eventConfigs] of Object.entries(config)) {
+    for (const [eventName, eventConfigs] of Object.entries(settings.hooks)) {
       for (const eventConfig of eventConfigs) {
         for (const hook of eventConfig.hooks) {
           hooks.push({

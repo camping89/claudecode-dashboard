@@ -18,17 +18,20 @@ export function CategoryMenu({ categories, selected, focused }: CategoryMenuProp
   return (
     <Box flexDirection="column">
       <Text bold underline>CATEGORIES</Text>
-      {categories.map((cat, i) => {
-        const isSelected = i === selected
-        const prefix = isSelected ? (focused ? '▸ ' : '› ') : '  '
-        const color = isSelected ? (focused ? 'cyan' : 'white') : 'gray'
+      <Box marginTop={1} flexDirection="column">
+        {categories.map((cat, i) => {
+          const isSelected = i === selected
+          const prefix = isSelected ? (focused ? '▸ ' : '› ') : '  '
+          const color = isSelected ? (focused ? 'cyan' : 'white') : 'gray'
 
-        return (
-          <Text key={cat.key} color={color}>
-            {prefix}{cat.label} ({cat.count})
-          </Text>
-        )
-      })}
+          return (
+            <Text key={cat.key} color={color}>
+              {prefix}{cat.label}
+              <Text dimColor> {cat.count}</Text>
+            </Text>
+          )
+        })}
+      </Box>
     </Box>
   )
 }
