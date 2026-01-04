@@ -1,4 +1,4 @@
-# CC Dashboard
+# ClaudeCode Dashboard
 
 CLI dashboard for viewing Claude Code configurations.
 
@@ -6,36 +6,39 @@ CLI dashboard for viewing Claude Code configurations.
 
 ```bash
 # npm
-npm install -g cc-dashboard
+npm install -g claudecode-dashboard
 
 # bun
-bun add -g cc-dashboard
+bun add -g claudecode-dashboard
 ```
 
 ## Usage
 
 ```bash
 # Interactive TUI
-cc-dashboard
+claudecode-dashboard
+ccd  # short alias
 
 # JSON output (all configs)
-cc-dashboard --json
+ccd --json
 
 # Specific category
-cc-dashboard skills
-cc-dashboard agents --json
-cc-dashboard mcp
+ccd skills
+ccd agents --json
+ccd mcp
 
 # Pipe to jq
-cc-dashboard skills --json | jq '.[].name'
+ccd skills --json | jq '.[].name'
 ```
 
 ## Keyboard Shortcuts
 
 | Key | Action |
 |-----|--------|
-| ↑↓ | Navigate items |
-| ←→ | Switch panels |
+| ↑↓ / jk | Navigate items |
+| ←→ / hl | Switch panels |
+| PgUp / u | Page up (10 items) |
+| PgDn / d | Page down (10 items) |
 | Enter | Select/expand |
 | r | Refresh |
 | q | Quit |
@@ -70,7 +73,7 @@ export OPENAI_API_KEY=sk-...
 - OpenAI: `gpt-5.2-mini` (fast, cheap)
 
 **Features:**
-- Summaries are cached in `~/.claude/cc-dashboard/cache.json`
+- Summaries are cached in `~/.claude/claudecode-dashboard/cache.json`
 - Cache invalidates automatically when files change
 - Status bar shows current provider and model
 - Without API key: shows `Preview` (first 30 lines of markdown)

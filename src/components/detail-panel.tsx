@@ -1,4 +1,3 @@
-// Detail panel component - shows selected item details with AI summaries
 import React from 'react'
 import { Box, Text } from 'ink'
 import Spinner from 'ink-spinner'
@@ -12,7 +11,6 @@ interface DetailPanelProps {
 }
 
 export function DetailPanel({ item, width, maxHeight, category }: DetailPanelProps) {
-  // Get path for summary (skills, agents, commands have paths)
   const filePath = item?.path as string | undefined
   const itemType = category || 'configuration'
   const { summary, isAI, loading, provider } = useSummary(filePath, itemType)
@@ -26,24 +24,19 @@ export function DetailPanel({ item, width, maxHeight, category }: DetailPanelPro
     )
   }
 
-  // Determine section title based on content type
   const summaryTitle = isAI ? 'AI Summary' : 'Preview'
   const summaryColor = isAI ? 'magenta' : 'blue'
-
-  // Create separator line
   const separator = '─'.repeat(Math.max(10, width - 4))
 
   return (
     <Box flexDirection="column" paddingX={1}>
       <Text bold underline>DETAILS</Text>
 
-      {/* Properties section (top) */}
       <Box marginTop={1} flexDirection="column">
         <Text color="green" bold>Properties:</Text>
         {renderFields(item, 1, width - 4)}
       </Box>
 
-      {/* Separator + Preview/Summary section (bottom) */}
       {filePath && (
         <Box marginTop={1} flexDirection="column">
           <Text dimColor>{separator}</Text>
@@ -51,7 +44,7 @@ export function DetailPanel({ item, width, maxHeight, category }: DetailPanelPro
             <Text color={summaryColor} bold>
               {summaryTitle}:
               {!isAI && provider === 'none' && (
-                <Text dimColor> (set API key for AI)</Text>
+                <Text dimColor> (run: export ANTHROPIC_API_KEY=... for AI summary)</Text>
               )}
             </Text>
             <Box marginLeft={1} flexDirection="column">
@@ -72,23 +65,28 @@ export function DetailPanel({ item, width, maxHeight, category }: DetailPanelPro
   )
 }
 
-// Word-wrap text to fit width
 function wrapText(text: string, maxWidth: number): string {
-  const words = text.split(' ')
-  const lines: string[] = []
-  let currentLine = ''
+  const paragraphs = text.split('\n')
 
-  for (const word of words) {
-    if ((currentLine + ' ' + word).trim().length <= maxWidth) {
-      currentLine = (currentLine + ' ' + word).trim()
-    } else {
-      if (currentLine) lines.push(currentLine)
-      currentLine = word
+  return paragraphs.map(paragraph => {
+    if (paragraph.length <= maxWidth) return paragraph
+
+    const words = paragraph.split(' ')
+    const lines: string[] = []
+    let currentLine = ''
+
+    for (const word of words) {
+      if ((currentLine + ' ' + word).trim().length <= maxWidth) {
+        currentLine = (currentLine + ' ' + word).trim()
+      } else {
+        if (currentLine) lines.push(currentLine)
+        currentLine = word
+      }
     }
-  }
-  if (currentLine) lines.push(currentLine)
+    if (currentLine) lines.push(currentLine)
 
-  return lines.join('\n')
+    return lines.join('\n')
+  }).join('\n')
 }
 
 function renderFields(obj: Record<string, unknown>, indent: number, maxWidth: number): React.ReactNode[] {

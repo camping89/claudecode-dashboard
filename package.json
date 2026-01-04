@@ -1,10 +1,11 @@
 {
-  "name": "cc-dashboard",
+  "name": "claudecode-dashboard",
   "version": "1.0.0",
   "description": "CLI dashboard for viewing Claude Code configurations",
   "type": "module",
   "bin": {
-    "cc-dashboard": "./dist/cli.js"
+    "claudecode-dashboard": "./dist/cli.js",
+    "ccd": "./dist/cli.js"
   },
   "files": ["dist"],
   "scripts": {

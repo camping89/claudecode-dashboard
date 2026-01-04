@@ -25,6 +25,8 @@ export interface NavState {
   left: () => void
   right: () => void
   select: () => void
+  pageUp: () => void
+  pageDown: () => void
 }
 
 export function useNavigation(config: { data: DashboardState }, initialCategory?: string): NavState {
@@ -89,6 +91,16 @@ export function useNavigation(config: { data: DashboardState }, initialCategory?
     right: () => setPanel('item'),
     select: () => {
       if (panel === 'category') setPanel('item')
+    },
+    pageUp: () => {
+      if (panel === 'item') {
+        setItemIndex(i => Math.max(0, i - 10))
+      }
+    },
+    pageDown: () => {
+      if (panel === 'item') {
+        setItemIndex(i => Math.min(currentItems.length - 1, i + 10))
+      }
     },
   }
 }

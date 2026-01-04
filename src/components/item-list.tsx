@@ -1,4 +1,3 @@
-// Item list component - shows items in selected category with scrolling
 import React from 'react'
 import { Box, Text } from 'ink'
 
@@ -26,7 +25,6 @@ export function ItemList({ items, selected, focused, maxHeight = 15 }: ItemListP
     )
   }
 
-  // Calculate visible items based on available height (subtract 3 for header + margins + scroll indicators)
   const maxVisible = Math.max(5, maxHeight - 3)
   const start = Math.max(0, Math.min(selected - Math.floor(maxVisible / 2), items.length - maxVisible))
   const visible = items.slice(start, start + maxVisible)
@@ -39,17 +37,28 @@ export function ItemList({ items, selected, focused, maxHeight = 15 }: ItemListP
         {visible.map((item, i) => {
           const actualIndex = start + i
           const isSelected = actualIndex === selected
-          const prefix = isSelected ? (focused ? '▸ ' : '› ') : '  '
-          const color = isSelected ? (focused ? 'cyan' : 'white') : 'gray'
 
-          // Truncate name to fit panel width (24 chars max)
           const name = item.name.length > 24 ? item.name.slice(0, 21) + '...' : item.name
 
-          return (
-            <Text key={`${item.name}-${actualIndex}`} color={color}>
-              {prefix}{name}
-            </Text>
-          )
+          if (isSelected && focused) {
+            return (
+              <Text key={`${item.name}-${actualIndex}`} bold underline>
+                {'▸ '}{name}
+              </Text>
+            )
+          } else if (isSelected) {
+            return (
+              <Text key={`${item.name}-${actualIndex}`} bold>
+                {'› '}{name}
+              </Text>
+            )
+          } else {
+            return (
+              <Text key={`${item.name}-${actualIndex}`} dimColor>
+                {'  '}{name}
+              </Text>
+            )
+          }
         })}
         {start + maxVisible < items.length && (
           <Text dimColor>↓ {items.length - start - maxVisible} more</Text>

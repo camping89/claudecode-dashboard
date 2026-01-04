@@ -1,4 +1,3 @@
-// Category menu component - left panel category list
 import React from 'react'
 import { Box, Text } from 'ink'
 
@@ -21,15 +20,26 @@ export function CategoryMenu({ categories, selected, focused }: CategoryMenuProp
       <Box marginTop={1} flexDirection="column">
         {categories.map((cat, i) => {
           const isSelected = i === selected
-          const prefix = isSelected ? (focused ? '▸ ' : '› ') : '  '
-          const color = isSelected ? (focused ? 'cyan' : 'white') : 'gray'
 
-          return (
-            <Text key={cat.key} color={color}>
-              {prefix}{cat.label}
-              <Text dimColor> {cat.count}</Text>
-            </Text>
-          )
+          if (isSelected && focused) {
+            return (
+              <Text key={cat.key} bold underline>
+                {'▸ '}{cat.label} <Text bold>{cat.count}</Text>
+              </Text>
+            )
+          } else if (isSelected) {
+            return (
+              <Text key={cat.key} bold>
+                {'› '}{cat.label} <Text dimColor>{cat.count}</Text>
+              </Text>
+            )
+          } else {
+            return (
+              <Text key={cat.key} dimColor>
+                {'  '}{cat.label} <Text dimColor>{cat.count}</Text>
+              </Text>
+            )
+          }
         })}
       </Box>
     </Box>

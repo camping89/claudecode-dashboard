@@ -1,20 +1,15 @@
-// AI-powered summarizer for markdown files
-// Supports OpenAI (GPT-5.2+) and Anthropic (Claude) APIs
-// Falls back to 30-line markdown preview if no API key
 import OpenAI from 'openai'
 import Anthropic from '@anthropic-ai/sdk'
 import { readFile } from 'fs/promises'
 import { existsSync } from 'fs'
 import { getCachedSummary, setCachedSummary } from './cache-manager.js'
 
-// Supported models - using latest efficient models
-const OPENAI_MODEL = 'gpt-5.2-mini'  // GPT-5.2 mini for fast, cheap summaries
-const CLAUDE_MODEL = 'claude-haiku-4-5-latest'  // Haiku 4.5 for efficiency
+const OPENAI_MODEL = 'gpt-5.2-mini'
+const CLAUDE_MODEL = 'claude-haiku-4-5-latest'
 
 let openaiClient: OpenAI | null = null
 let anthropicClient: Anthropic | null = null
 
-// Provider detection
 export type LLMProvider = 'openai' | 'anthropic' | 'none'
 
 export function getConfiguredProvider(): LLMProvider {
@@ -38,7 +33,6 @@ export function getProviderStatus(): { provider: LLMProvider; description: strin
   }
 }
 
-// Initialize clients lazily
 function getOpenAI(): OpenAI | null {
   if (openaiClient) return openaiClient
   const apiKey = process.env.OPENAI_API_KEY
@@ -55,12 +49,18 @@ function getAnthropic(): Anthropic | null {
   return anthropicClient
 }
 
-// Extract first N lines from markdown (fallback preview)
-function getMarkdownPreview(content: string, lines: number = 30): string {
-  const allLines = content.split('\n')
-  const preview = allLines.slice(0, lines)
+export const PREVIEW_LINE_COUNT = 30
 
-  // Remove frontmatter if present
+function sanitizeForTUI(text: string): string {
+  return text
+    .replace(/\|/g, '│')
+    .replace(/─{3,}/g, '───')
+}
+
+function getMarkdownPreview(content: string, maxLines: number = PREVIEW_LINE_COUNT): { text: string; isEOF: boolean } {
+  const allLines = content.split('\n')
+  let preview = allLines.slice(0, maxLines)
+
   if (preview[0] === '---') {
     const endIdx = preview.findIndex((line, i) => i > 0 && line === '---')
     if (endIdx > 0) {
@@ -68,12 +68,19 @@ function getMarkdownPreview(content: string, lines: number = 30): string {
     }
   }
 
-  const result = preview.join('\n').trim()
-  const hasMore = allLines.length > lines
-  return hasMore ? result + '\n...' : result
+  const isEOF = allLines.length <= maxLines
+  let result = preview.join('\n').trim()
+  result = sanitizeForTUI(result)
+
+  if (isEOF) {
+    result += '\n───────────────────────────\n<EOF>'
+  } else {
+    result += `\n───────────────────────────\n... (${allLines.length - maxLines} more lines)`
+  }
+
+  return { text: result, isEOF }
 }
 
-// Generate summary using configured provider
 async function generateAISummary(content: string, itemType: string): Promise<string | null> {
   const provider = getConfiguredProvider()
   const prompt = `Summarize this ${itemType} in 2-3 sentences. Focus on: what it does, key features, when to use it. Be direct and technical.`
@@ -121,19 +128,16 @@ async function generateAISummary(content: string, itemType: string): Promise<str
   return null
 }
 
-// Get summary for a file (cached → AI → preview fallback)
 export async function getSummary(filePath: string, itemType: string): Promise<{ text: string; isAI: boolean }> {
   if (!existsSync(filePath)) {
     return { text: '[File not found]', isAI: false }
   }
 
-  // Check cache first
   const cached = await getCachedSummary(filePath)
   if (cached) {
     return { text: cached, isAI: true }
   }
 
-  // Read file content
   let content: string
   try {
     content = await readFile(filePath, 'utf-8')
@@ -141,7 +145,6 @@ export async function getSummary(filePath: string, itemType: string): Promise<{ 
     return { text: '[Failed to read file]', isAI: false }
   }
 
-  // Try AI summary if configured
   const provider = getConfiguredProvider()
   if (provider !== 'none') {
     const aiSummary = await generateAISummary(content, itemType)
@@ -151,11 +154,10 @@ export async function getSummary(filePath: string, itemType: string): Promise<{ 
     }
   }
 
-  // Fallback to 30-line preview
-  return { text: getMarkdownPreview(content, 30), isAI: false }
+  const preview = getMarkdownPreview(content)
+  return { text: preview.text, isAI: false }
 }
 
-// Legacy compatibility
 export function isOpenAIConfigured(): boolean {
   return getConfiguredProvider() !== 'none'
 }

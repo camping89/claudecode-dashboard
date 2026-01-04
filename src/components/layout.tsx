@@ -16,8 +16,7 @@ interface LayoutProps {
 }
 
 export function Layout({ config, nav, width, height }: LayoutProps) {
-  // Tree layout: Categories (18) | Items (30) | Details (rest)
-  const categoryWidth = 18
+  const categoryWidth = 22
   const itemWidth = 30
   const detailWidth = width - categoryWidth - itemWidth - 6  // 6 for borders
 

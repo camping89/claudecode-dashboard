@@ -1,5 +1,5 @@
 // Cache manager for AI-generated summaries
-// Stores summaries in ~/.claude/cc-dashboard/cache.json
+// Stores summaries in ~/.claude/claudecode-dashboard/cache.json
 import { readFile, writeFile, mkdir, stat } from 'fs/promises'
 import { existsSync } from 'fs'
 import { homedir } from 'os'
@@ -16,7 +16,7 @@ interface CacheData {
   entries: Record<string, CacheEntry>
 }
 
-const CACHE_DIR = join(homedir(), '.claude', 'cc-dashboard')
+const CACHE_DIR = join(homedir(), '.claude', 'claudecode-dashboard')
 const CACHE_FILE = join(CACHE_DIR, 'cache.json')
 
 let memoryCache: CacheData | null = null

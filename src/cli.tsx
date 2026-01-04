@@ -3,7 +3,7 @@ import { Command } from 'commander'
 import { printJsonOutput } from './lib/json-output.js'
 
 const program = new Command()
-  .name('cc-dashboard')
+  .name('claudecode-dashboard')
   .description('View Claude Code configurations')
   .version('1.0.0')
   .argument('[category]', 'Category to show (skills, agents, commands, hooks, mcp, plugins, settings)')

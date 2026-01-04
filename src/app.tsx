@@ -19,11 +19,13 @@ export function App({ initialCategory }: AppProps) {
   useInput((input, key) => {
     if (input === 'q') exit()
     if (input === 'r') config.refresh()
-    if (key.upArrow) nav.up()
-    if (key.downArrow) nav.down()
-    if (key.leftArrow) nav.left()
-    if (key.rightArrow) nav.right()
+    if (key.upArrow || input === 'k') nav.up()
+    if (key.downArrow || input === 'j') nav.down()
+    if (key.leftArrow || input === 'h') nav.left()
+    if (key.rightArrow || input === 'l') nav.right()
     if (key.return) nav.select()
+    if (key.pageUp || input === 'u') nav.pageUp()
+    if (key.pageDown || input === 'd') nav.pageDown()
   })
 
   const width = stdout?.columns ?? 120
