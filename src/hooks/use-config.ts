@@ -1,4 +1,3 @@
-// Config loading hook - loads all Claude Code configurations
 import { useState, useEffect, useCallback } from 'react'
 import {
   readSettings,
@@ -10,6 +9,7 @@ import {
   readPlugins,
 } from '../lib/config-reader/index.js'
 import type { DashboardState } from '../lib/types.js'
+import { logManager } from '../lib/log-manager.js'
 
 interface UseConfigReturn {
   data: DashboardState
@@ -34,6 +34,7 @@ export function useConfig(): UseConfigReturn {
 
   const loadAll = useCallback(async () => {
     setLoading(true)
+    logManager.info('config', 'Loading configurations...')
     try {
       const [settings, skills, agents, commands, hooks, mcpServers, plugins] =
         await Promise.all([
@@ -57,8 +58,11 @@ export function useConfig(): UseConfigReturn {
         outputStyles: [],
       })
       setError(null)
+      logManager.info('config', `Loaded: ${skills.length} skills, ${agents.length} agents, ${commands.length} commands`)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load config')
+      const msg = e instanceof Error ? e.message : 'Failed to load config'
+      logManager.error('config', `Load failed: ${msg}`)
+      setError(msg)
     } finally {
       setLoading(false)
     }

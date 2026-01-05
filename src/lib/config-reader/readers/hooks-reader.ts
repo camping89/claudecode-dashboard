@@ -1,9 +1,8 @@
-// Hooks configuration reader
-// Reads hooks from ~/.claude/settings.json under the "hooks" key
 import { readFile } from 'fs/promises'
 import { existsSync } from 'fs'
 import type { Hook } from '../../types.js'
 import { CLAUDE_PATHS } from '../paths.js'
+import { logManager } from '../../log-manager.js'
 
 interface HooksConfig {
   [eventName: string]: Array<{
@@ -51,7 +50,9 @@ export async function readHooks(): Promise<Hook[]> {
     }
 
     return hooks
-  } catch {
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Unknown error'
+    logManager.error('hooks', `Failed to parse hooks from settings: ${msg}`)
     return []
   }
 }

@@ -1,11 +1,10 @@
-// Slash commands configuration reader
 import { readdir, readFile } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join } from 'path'
 import type { SlashCommand } from '../../types.js'
 import { CLAUDE_PATHS } from '../paths.js'
+import { logManager } from '../../log-manager.js'
 
-// Parse command markdown frontmatter
 function parseCommandFrontmatter(content: string): Partial<SlashCommand> {
   const match = content.match(/^---\n([\s\S]*?)\n---/)
   if (!match) return {}
@@ -43,7 +42,6 @@ export async function readCommands(): Promise<SlashCommand[]> {
       try {
         const content = await readFile(commandPath, 'utf-8')
         const parsed = parseCommandFrontmatter(content)
-        // Command name from file path (e.g., "ck/brainstorm.md" -> "ck:brainstorm")
         const name = filePath.replace(/\.md$/, '').replace(/[\/\\]/g, ':')
 
         commands.push({
@@ -55,13 +53,16 @@ export async function readCommands(): Promise<SlashCommand[]> {
           source: 'user',
           path: commandPath,
         })
-      } catch {
-        // Skip invalid commands
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : 'Unknown error'
+        logManager.warn('commands', `Failed to read command ${filePath}: ${msg}`)
       }
     }
 
     return commands
-  } catch {
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Unknown error'
+    logManager.error('commands', `Failed to read commands directory: ${msg}`)
     return []
   }
 }

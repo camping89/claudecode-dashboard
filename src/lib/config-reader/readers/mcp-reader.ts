@@ -1,10 +1,9 @@
-// MCP servers configuration reader
-// Reads from ~/.mcp.json (user-level) and ./.mcp.json (project-level)
 import { readFile } from 'fs/promises'
 import { existsSync } from 'fs'
 import { homedir } from 'os'
 import { join } from 'path'
 import type { McpServer } from '../../types.js'
+import { logManager } from '../../log-manager.js'
 
 interface McpConfig {
   mcpServers?: {
@@ -21,7 +20,6 @@ interface McpConfig {
 export async function readMcpServers(): Promise<McpServer[]> {
   const servers: McpServer[] = []
 
-  // Read user-level ~/.mcp.json
   const userMcpPath = join(homedir(), '.mcp.json')
   if (existsSync(userMcpPath)) {
     try {
@@ -40,12 +38,12 @@ export async function readMcpServers(): Promise<McpServer[]> {
           })
         }
       }
-    } catch {
-      // Ignore parse errors
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Unknown error'
+      logManager.error('mcp', `Failed to parse ~/.mcp.json: ${msg}`)
     }
   }
 
-  // Read project-level ./.mcp.json
   const projectMcpPath = join(process.cwd(), '.mcp.json')
   if (existsSync(projectMcpPath)) {
     try {
@@ -64,8 +62,9 @@ export async function readMcpServers(): Promise<McpServer[]> {
           })
         }
       }
-    } catch {
-      // Ignore parse errors
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Unknown error'
+      logManager.error('mcp', `Failed to parse ./.mcp.json: ${msg}`)
     }
   }
 

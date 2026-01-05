@@ -1,11 +1,10 @@
-// Skills configuration reader
 import { readdir, readFile } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join } from 'path'
 import type { Skill } from '../../types.js'
 import { CLAUDE_PATHS } from '../paths.js'
+import { logManager } from '../../log-manager.js'
 
-// Parse SKILL.md frontmatter
 function parseSkillFrontmatter(content: string): Partial<Skill> {
   const match = content.match(/^---\n([\s\S]*?)\n---/)
   if (!match) return {}
@@ -52,13 +51,16 @@ export async function readSkills(): Promise<Skill[]> {
           source: 'user',
           path: skillPath,
         })
-      } catch {
-        // Skip invalid skills
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : 'Unknown error'
+        logManager.warn('skills', `Failed to read skill ${entry.name}: ${msg}`)
       }
     }
 
     return skills
-  } catch {
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Unknown error'
+    logManager.error('skills', `Failed to read skills directory: ${msg}`)
     return []
   }
 }

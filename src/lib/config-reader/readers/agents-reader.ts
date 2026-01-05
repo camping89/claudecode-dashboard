@@ -1,11 +1,10 @@
-// Agents configuration reader
 import { readdir, readFile } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join } from 'path'
 import type { Agent } from '../../types.js'
 import { CLAUDE_PATHS } from '../paths.js'
+import { logManager } from '../../log-manager.js'
 
-// Parse agent markdown frontmatter
 function parseAgentFrontmatter(content: string): Partial<Agent> {
   const match = content.match(/^---\n([\s\S]*?)\n---/)
   if (!match) return {}
@@ -56,13 +55,16 @@ export async function readAgents(): Promise<Agent[]> {
           source: 'user',
           path: agentPath,
         })
-      } catch {
-        // Skip invalid agents
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : 'Unknown error'
+        logManager.warn('agents', `Failed to read agent ${file}: ${msg}`)
       }
     }
 
     return agents
-  } catch {
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Unknown error'
+    logManager.error('agents', `Failed to read agents directory: ${msg}`)
     return []
   }
 }

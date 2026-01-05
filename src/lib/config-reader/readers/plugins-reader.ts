@@ -1,9 +1,9 @@
-// Plugins configuration reader
 import { readdir, readFile } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join } from 'path'
 import type { Plugin } from '../../types.js'
 import { CLAUDE_PATHS } from '../paths.js'
+import { logManager } from '../../log-manager.js'
 
 interface PluginManifest {
   name: string
@@ -36,7 +36,6 @@ export async function readPlugins(): Promise<Plugin[]> {
         const content = await readFile(manifestPath, 'utf-8')
         const manifest: PluginManifest = JSON.parse(content)
 
-        // Normalize arrays
         const toArray = (v: string | string[] | undefined): string[] => {
           if (!v) return []
           return Array.isArray(v) ? v : [v]
@@ -46,7 +45,7 @@ export async function readPlugins(): Promise<Plugin[]> {
           name: manifest.name || entry.name,
           version: manifest.version,
           description: manifest.description,
-          enabled: true, // Would need to check settings for actual state
+          enabled: true,
           path: pluginPath,
           commands: toArray(manifest.commands),
           agents: toArray(manifest.agents),
@@ -54,13 +53,16 @@ export async function readPlugins(): Promise<Plugin[]> {
           hooks: manifest.hooks ? [manifest.hooks] : [],
           mcpServers: manifest.mcpServers ? [manifest.mcpServers] : [],
         })
-      } catch {
-        // Skip invalid plugins
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : 'Unknown error'
+        logManager.warn('plugins', `Failed to read plugin ${entry.name}: ${msg}`)
       }
     }
 
     return plugins
-  } catch {
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Unknown error'
+    logManager.error('plugins', `Failed to read plugins directory: ${msg}`)
     return []
   }
 }

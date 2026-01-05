@@ -3,8 +3,9 @@ import Anthropic from '@anthropic-ai/sdk'
 import { readFile } from 'fs/promises'
 import { existsSync } from 'fs'
 import { getCachedSummary, setCachedSummary } from './cache-manager.js'
+import { logManager } from '../log-manager.js'
 
-const OPENAI_MODEL = 'gpt-5.2-mini'
+const OPENAI_MODEL = 'gpt-4o-mini'
 const CLAUDE_MODEL = 'claude-haiku-4-5-latest'
 
 let openaiClient: OpenAI | null = null
@@ -81,32 +82,57 @@ function getMarkdownPreview(content: string, maxLines: number = PREVIEW_LINE_COU
   return { text: result, isEOF }
 }
 
-async function generateAISummary(content: string, itemType: string): Promise<string | null> {
+async function generateAISummary(content: string, itemType: string): Promise<string> {
   const provider = getConfiguredProvider()
-  const prompt = `Summarize this ${itemType} in 2-3 sentences. Focus on: what it does, key features, when to use it. Be direct and technical.`
+  const prompt = `You are a senior engineer reviewing this Claude Code ${itemType}.
+
+Provide a structured analysis (keep it concise, ~500 words max):
+
+**What it does:** 2-3 sentences explaining the core functionality and behavior.
+
+**Key details:**
+- Implementation: How it works technically (tools, patterns, integrations)
+- Trigger: When/how it activates (events, commands, conditions)
+- Scope: What it affects (files, sessions, permissions)
+
+**Engineering notes:** 1-2 practical tips or gotchas.
+
+Be specific and technical. Include actual values from the config. Ensure your response is COMPLETE - do not cut off mid-sentence.`
   const truncatedContent = content.slice(0, 4000)
 
   if (provider === 'anthropic') {
     const client = getAnthropic()
-    if (!client) return null
+    if (!client) {
+      logManager.error('ai', 'Anthropic client initialization failed')
+      throw new Error('Anthropic client init failed')
+    }
 
     try {
       const response = await client.messages.create({
         model: CLAUDE_MODEL,
-        max_tokens: 150,
+        max_tokens: 1000,
         messages: [{ role: 'user', content: `${prompt}\n\n${truncatedContent}` }],
       })
       const textBlock = response.content.find(b => b.type === 'text')
-      return textBlock?.type === 'text' ? textBlock.text.trim() : null
-    } catch (error) {
-      console.error('Anthropic error:', error)
-      return null
+      if (textBlock?.type === 'text') {
+        logManager.info('ai', `Generated summary using ${CLAUDE_MODEL}`)
+        return textBlock.text.trim()
+      }
+      logManager.error('ai', 'No text in Anthropic response')
+      throw new Error('No text in Anthropic response')
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Unknown error'
+      logManager.error('ai', `Anthropic API error: ${msg}`)
+      throw e
     }
   }
 
   if (provider === 'openai') {
     const client = getOpenAI()
-    if (!client) return null
+    if (!client) {
+      logManager.error('ai', 'OpenAI client initialization failed')
+      throw new Error('OpenAI client init failed')
+    }
 
     try {
       const response = await client.chat.completions.create({
@@ -115,47 +141,69 @@ async function generateAISummary(content: string, itemType: string): Promise<str
           { role: 'system', content: prompt },
           { role: 'user', content: truncatedContent },
         ],
-        max_tokens: 150,
+        max_tokens: 1000,
         temperature: 0.3,
       })
-      return response.choices[0]?.message?.content?.trim() || null
-    } catch (error) {
-      console.error('OpenAI error:', error)
-      return null
+      const text = response.choices[0]?.message?.content?.trim()
+      if (text) {
+        logManager.info('ai', `Generated summary using ${OPENAI_MODEL}`)
+        return text
+      }
+      logManager.error('ai', 'No text in OpenAI response')
+      throw new Error('No text in OpenAI response')
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Unknown error'
+      logManager.error('ai', `OpenAI API error: ${msg}`)
+      throw e
     }
   }
 
-  return null
+  logManager.warn('ai', 'No AI provider configured')
+  throw new Error('No AI provider configured')
 }
 
-export async function getSummary(filePath: string, itemType: string): Promise<{ text: string; isAI: boolean }> {
-  if (!existsSync(filePath)) {
-    return { text: '[File not found]', isAI: false }
-  }
+export interface SummaryResult {
+  aiSummary: string | null
+  preview: string
+  aiError?: string
+}
 
-  const cached = await getCachedSummary(filePath)
-  if (cached) {
-    return { text: cached, isAI: true }
+export async function getSummary(filePath: string, itemType: string): Promise<SummaryResult> {
+  if (!existsSync(filePath)) {
+    logManager.warn('summary', `File not found: ${filePath}`)
+    return { aiSummary: null, preview: '[File not found]' }
   }
 
   let content: string
   try {
     content = await readFile(filePath, 'utf-8')
-  } catch {
-    return { text: '[Failed to read file]', isAI: false }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Unknown error'
+    logManager.error('summary', `Failed to read file ${filePath}: ${msg}`)
+    return { aiSummary: null, preview: '[Failed to read file]' }
+  }
+
+  const preview = getMarkdownPreview(content)
+
+  const cached = await getCachedSummary(filePath)
+  if (cached) {
+    logManager.info('summary', `Using cached summary for ${filePath}`)
+    return { aiSummary: cached, preview: preview.text }
   }
 
   const provider = getConfiguredProvider()
   if (provider !== 'none') {
-    const aiSummary = await generateAISummary(content, itemType)
-    if (aiSummary) {
+    try {
+      const aiSummary = await generateAISummary(content, itemType)
       await setCachedSummary(filePath, aiSummary)
-      return { text: aiSummary, isAI: true }
+      return { aiSummary, preview: preview.text }
+    } catch (e) {
+      const errMsg = e instanceof Error ? e.message : 'Unknown error'
+      return { aiSummary: null, preview: preview.text, aiError: errMsg }
     }
   }
 
-  const preview = getMarkdownPreview(content)
-  return { text: preview.text, isAI: false }
+  return { aiSummary: null, preview: preview.text }
 }
 
 export function isOpenAIConfigured(): boolean {

@@ -1,13 +1,12 @@
-// Cache manager for AI-generated summaries
-// Stores summaries in ~/.claude/claudecode-dashboard/cache.json
 import { readFile, writeFile, mkdir, stat } from 'fs/promises'
 import { existsSync } from 'fs'
 import { homedir } from 'os'
 import { join } from 'path'
+import { logManager } from '../log-manager.js'
 
 interface CacheEntry {
   summary: string
-  mtime: number  // File modification time when summary was generated
+  mtime: number
   generatedAt: number
 }
 
@@ -21,14 +20,12 @@ const CACHE_FILE = join(CACHE_DIR, 'cache.json')
 
 let memoryCache: CacheData | null = null
 
-// Ensure cache directory exists
 async function ensureCacheDir(): Promise<void> {
   if (!existsSync(CACHE_DIR)) {
     await mkdir(CACHE_DIR, { recursive: true })
   }
 }
 
-// Load cache from disk
 async function loadCache(): Promise<CacheData> {
   if (memoryCache) return memoryCache
 
@@ -43,40 +40,44 @@ async function loadCache(): Promise<CacheData> {
     const content = await readFile(CACHE_FILE, 'utf-8')
     memoryCache = JSON.parse(content) as CacheData
     return memoryCache
-  } catch {
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Unknown error'
+    logManager.warn('cache', `Failed to load cache, starting fresh: ${msg}`)
     memoryCache = { version: 1, entries: {} }
     return memoryCache
   }
 }
 
-// Save cache to disk
 async function saveCache(): Promise<void> {
   if (!memoryCache) return
-  await ensureCacheDir()
-  await writeFile(CACHE_FILE, JSON.stringify(memoryCache, null, 2))
+  try {
+    await ensureCacheDir()
+    await writeFile(CACHE_FILE, JSON.stringify(memoryCache, null, 2))
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Unknown error'
+    logManager.error('cache', `Failed to save cache: ${msg}`)
+  }
 }
 
-// Get file modification time
 async function getFileMtime(filePath: string): Promise<number> {
   try {
     const stats = await stat(filePath)
     return stats.mtimeMs
-  } catch {
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Unknown error'
+    logManager.warn('cache', `Failed to get mtime for ${filePath}: ${msg}`)
     return 0
   }
 }
 
-// Get cached summary if valid (file hasn't changed)
 export async function getCachedSummary(filePath: string): Promise<string | null> {
   const cache = await loadCache()
   const entry = cache.entries[filePath]
 
   if (!entry) return null
 
-  // Check if file has been modified since summary was generated
   const currentMtime = await getFileMtime(filePath)
   if (currentMtime !== entry.mtime) {
-    // File changed, invalidate cache
     delete cache.entries[filePath]
     await saveCache()
     return null
@@ -85,7 +86,6 @@ export async function getCachedSummary(filePath: string): Promise<string | null>
   return entry.summary
 }
 
-// Store summary in cache
 export async function setCachedSummary(filePath: string, summary: string): Promise<void> {
   const cache = await loadCache()
   const mtime = await getFileMtime(filePath)
@@ -99,21 +99,36 @@ export async function setCachedSummary(filePath: string, summary: string): Promi
   await saveCache()
 }
 
-// Clear all cached summaries
 export async function clearCache(): Promise<void> {
   memoryCache = { version: 1, entries: {} }
   await saveCache()
+  logManager.info('cache', 'Cache cleared')
 }
 
-// Get cache stats
+export async function clearCacheEntry(filePath: string): Promise<boolean> {
+  const cache = await loadCache()
+  if (cache.entries[filePath]) {
+    delete cache.entries[filePath]
+    await saveCache()
+    logManager.info('cache', `Cache cleared for: ${filePath}`)
+    return true
+  }
+  return false
+}
+
 export async function getCacheStats(): Promise<{ entries: number; size: number }> {
   const cache = await loadCache()
   const entries = Object.keys(cache.entries).length
 
   let size = 0
   if (existsSync(CACHE_FILE)) {
-    const stats = await stat(CACHE_FILE)
-    size = stats.size
+    try {
+      const stats = await stat(CACHE_FILE)
+      size = stats.size
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Unknown error'
+      logManager.warn('cache', `Failed to get cache file size: ${msg}`)
+    }
   }
 
   return { entries, size }
