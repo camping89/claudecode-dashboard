@@ -1,7 +1,17 @@
 {
   "name": "claudecode-dashboard",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CLI dashboard for viewing Claude Code configurations",
+  "author": "camping89",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/camping89/claudecode-dashboard.git"
+  },
+  "homepage": "https://github.com/camping89/claudecode-dashboard#readme",
+  "bugs": {
+    "url": "https://github.com/camping89/claudecode-dashboard/issues"
+  },
   "type": "module",
   "bin": {
     "claudecode-dashboard": "./dist/cli.js",
@@ -33,6 +43,5 @@
   "engines": {
     "node": ">=20"
   },
-  "keywords": ["claude", "cli", "dashboard", "tui", "config"],
-  "license": "MIT"
+  "keywords": ["claude", "cli", "dashboard", "tui", "config"]
 }
